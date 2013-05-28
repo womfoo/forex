@@ -1,0 +1,27 @@
+name:                forex
+version:             0.0.0.0
+synopsis:            Wrapper for various currency exchange rates
+description:         Pull currency exchange rates from openexchangerates.org and Yahoo Finance (via YQL)
+homepage:            http://github.com/womfoo/forex
+license:             BSD3
+license-file:        LICENSE
+author:              Kranium Gikos Mendoza
+maintainer:          kranium@gikos.net
+copyright:           (c) 2013, Kranium Gikos Mendoza
+category:            Finance
+build-type:          Simple
+cabal-version:       >=1.8
+
+library
+  exposed-modules:     Finance.Forex.OER, Finance.Forex.Types, Finance.Forex.YQL
+  build-depends:
+    aeson == 0.6.*,
+    base == 4.*,
+    bytestring == 0.10.*,
+    http-conduit == 1.9.*,
+    http-types == 0.8.*,
+    mtl == 2.1.*,
+    safe == 0.3.*,
+    text == 0.11.*,
+    time == 1.4.*,
+    unordered-containers == 0.2.*
