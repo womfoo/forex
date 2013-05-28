@@ -12,8 +12,8 @@ import           Data.Time
 import           Data.Time.Clock.POSIX
 import           Network.HTTP.Conduit
 
-oerRate :: (MonadIO m) => T.Text -> m (Maybe Quote)
-oerRate appid =  liftIO $ do
+oerRate :: T.Text -> IO (Maybe Quote)
+oerRate appid =  do
   request <- parseUrl $ "http://openexchangerates.org/api/latest.json?app_id=" ++ T.unpack appid
   response <- withManager . httpLbs $ request { checkStatus = \_ _ _ -> Nothing }
   return $ decode . responseBody $ response

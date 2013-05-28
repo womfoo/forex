@@ -14,8 +14,8 @@ import           Network.HTTP.Conduit
 import           Network.HTTP.Types    (renderSimpleQuery)
 import           Safe
 
-yahooRate :: (MonadIO m) => T.Text -> [T.Text] -> m (Maybe Quote)
-yahooRate base counters =  liftIO $ do
+yahooRate :: T.Text -> [T.Text] -> IO (Maybe Quote)
+yahooRate base counters =  do
   request <- yahooRequest base counters
   response <- withManager . httpLbs $ request
   return $ decode . responseBody $ response
