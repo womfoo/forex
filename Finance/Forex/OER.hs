@@ -1,9 +1,8 @@
 {-# LANGUAGE OverloadedStrings #-}
-module Finance.Forex.OER (oerRate) where
+module Finance.Forex.OER (OERQuery(..)) where
 
 import           Finance.Forex.Types
 import           Control.Applicative
-import           Control.Monad.Trans
 import           Data.Aeson
 import           Data.Aeson.Types
 import qualified Data.HashMap.Lazy          as HM
@@ -12,11 +11,12 @@ import           Data.Time
 import           Data.Time.Clock.POSIX
 import           Network.HTTP.Conduit
 
-oerRate :: T.Text -> IO (Maybe Quote)
-oerRate appid =  do
-  request <- parseUrl $ "http://openexchangerates.org/api/latest.json?app_id=" ++ T.unpack appid
-  response <- withManager . httpLbs $ request { checkStatus = \_ _ _ -> Nothing }
-  return $ decode . responseBody $ response
+data OERQuery = OERQuery T.Text
+
+instance Query OERQuery where
+  url (OERQuery appid)
+    = "http://openexchangerates.org/api/latest.json?app_id=" ++ T.unpack appid
+  respHandler _ = decode . responseBody
 
 instance FromJSON Quote where
   parseJSON (Object o) =

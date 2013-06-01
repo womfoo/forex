@@ -1,10 +1,9 @@
 {-# LANGUAGE OverloadedStrings #-}
-module Finance.Forex.YQL (yahooRate) where
+module Finance.Forex.YQL (YQLQuery(..)) where
 
 import           Finance.Forex.Types
 import           Control.Applicative
 import           Control.Monad
-import           Control.Monad.Trans
 import           Data.Aeson
 import qualified Data.ByteString.Char8 as B
 import           Data.List
@@ -14,26 +13,22 @@ import           Network.HTTP.Conduit
 import           Network.HTTP.Types    (renderSimpleQuery)
 import           Safe
 
-yahooRate :: T.Text -> [T.Text] -> IO (Maybe Quote)
-yahooRate base counters =  do
-  request <- yahooRequest base counters
-  response <- withManager . httpLbs $ request
-  return $ decode . responseBody $ response
+data YQLQuery = YQLQuery T.Text [T.Text]
 
-yahooRequest base counters = do
-  request <- parseUrl $ B.unpack url
-  return $ request { checkStatus = \_ _ _ -> Nothing }
-  where base' = T.encodeUtf8 base
-        counters' = map T.encodeUtf8 counters
-        url   = B.concat ["http://query.yahooapis.com/v1/public/yql"
-                         ,renderSimpleQuery True parms]
-        parms = [("q",yql)
-                ,("env","store://datatables.org/alltableswithkeys")
-                ,("format","json")]
-        yql   = B.concat ["select * from yahoo.finance.xchange where pair in ("
-                         , B.concat ( intersperse "," pairs)
-                         ,")"]
-        pairs = map (\c -> B.concat ["\"",base',c,"\""]) counters'
+instance Query YQLQuery where
+  url (YQLQuery base counters) = B.unpack url'
+    where base'     = T.encodeUtf8 base
+          counters' = map T.encodeUtf8 counters
+          url'      = B.concat ["http://query.yahooapis.com/v1/public/yql"
+                              ,renderSimpleQuery True parms]
+          parms     = [("q",yql)
+                      ,("env","store://datatables.org/alltableswithkeys")
+                      ,("format","json")]
+          yql       = B.concat ["select * from yahoo.finance.xchange where pair in ("
+                               , B.concat ( intersperse "," pairs)
+                               ,")"]
+          pairs     = map (\c -> B.concat ["\"",base',c,"\""]) counters'
+  respHandler _ = decode . responseBody
 
 instance FromJSON Quote where
   parseJSON (Object o) = do

@@ -1,11 +1,12 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE PatternGuards #-}
-module Finance.Forex.GoogleCalc (googleCalcRate) where
+module Finance.Forex.GoogleCalc (GoogQuery(..))  where
 
 import           Finance.Forex.Types
 import           Control.Applicative
 import           Control.Monad
 import           Data.Aeson
+import qualified Data.ByteString.Char8   as B
 import qualified Data.HashMap.Lazy       as HM
 import qualified Data.Text               as T
 import qualified Data.Text.Lazy          as TL
@@ -13,16 +14,25 @@ import qualified Data.Text.Lazy.Encoding as TLE
 import           Data.Text.Read
 import           Data.Time
 import           Network.HTTP.Conduit
+import           Network.HTTP.Types.Header
+import           System.Locale
 
-googleCalcRate :: T.Text -> T.Text -> IO (Maybe Quote)
-googleCalcRate base counter =  do
-  request <- parseUrl $ "http://www.google.com/ig/calculator?hl=en&q=1" ++ T.unpack base ++ "%3D%3F" ++ T.unpack counter
-  response <- withManager . httpLbs $ request { checkStatus = \_ _ _ -> Nothing }
-  now <- getCurrentTime
-  let parsedValue = decode . TLE.encodeUtf8 . quoteJSONKeys . TLE.decodeUtf8 . responseBody $ response
-      addCurrency r = r {pair = T.append base counter}
-  return $ Quote <$> pure now
-                 <*> (replicate 1 <$> addCurrency <$> parsedValue)
+data GoogQuery = GoogQuery T.Text T.Text
+
+instance Query GoogQuery where
+  url (GoogQuery base counter)
+    = concat ["http://www.google.com/ig/calculator?hl=en&q=1"
+             ,T.unpack base
+             ,"%3D%3F"
+             ,T.unpack counter]
+  respHandler (GoogQuery base counter) response
+    | (Just rawtime) <- lookup hDate . responseHeaders $ response
+    , (Just time) <- parseTime defaultTimeLocale "%a, %d %b %Y %H:%M:%S %Z" $ B.unpack rawtime
+    = do let parsedValue = decode . TLE.encodeUtf8 . quoteJSONKeys . TLE.decodeUtf8 . responseBody $ response
+             addCurrency r = r {pair = T.append base counter}
+         Quote <$> (pure time)
+               <*> (replicate 1 <$> addCurrency <$> parsedValue)
+  respHandler _  _ = mzero
 
 instance FromJSON Rate where
   parseJSON (Object o)  | Just "" <- HM.lookup "error" o
