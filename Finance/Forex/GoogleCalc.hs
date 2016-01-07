@@ -15,7 +15,6 @@ import           Data.Text.Read
 import           Data.Time
 import           Network.HTTP.Conduit
 import           Network.HTTP.Types.Header
-import           System.Locale
 
 data GoogQuery = GoogQuery T.Text T.Text
 
