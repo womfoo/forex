@@ -2,7 +2,7 @@ name:                forex
 version:             0.0.0.0
 synopsis:            Wrapper for various currency exchange rates
 description:         
-  Pull exchange rate data from folloiwng sources:
+  Pull exchange rate data from the following sources:
   .
   * Google Calculator
   .

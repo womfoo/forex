@@ -1,0 +1,7 @@
+#+TITLE: forex
+
+Pull exchange rate data from the following sources:
+
+ * Google Calculator
+ * openexchangerates.org
+ * Yahoo Finance (via YQL)
