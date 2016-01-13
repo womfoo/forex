@@ -28,13 +28,13 @@ library
     Finance.Forex.Types
     Finance.Forex.YQL
   build-depends:
-    aeson >= 0.9,
-    base == 4.*,
+    aeson >= 0.10,
+    base .= 4.8,
     bytestring >= 0.10,
     http-conduit >= 2.1,
-    http-types >= 0.8,
+    http-types >= 0.9,
     mtl >= 2.2,
     safe >= 0.3,
-    text >= 0.12,
+    text >= 1.2,
     time >= 1.5,
     unordered-containers >= 0.2
